@@ -1,13 +1,17 @@
 import React from 'react';
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate, Outlet, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Stethoscope, LogOut, Activity } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Stethoscope, LogOut, Activity, Upload, LayoutDashboard } from 'lucide-react';
 import { HealthIndicator } from '@/components/HealthIndicator';
 
 const Layout = () => {
   const { user, signOut, loading } = useAuth();
+  const location = useLocation();
+
+  const isActive = (path: string) => location.pathname === path;
 
   if (loading) {
     return (
@@ -50,7 +54,33 @@ const Layout = () => {
               </div>
             </div>
 
-            {/* Center - Health Indicator */}
+            {/* Navigation */}
+            <nav className="flex items-center space-x-4">
+              <Link 
+                to="/" 
+                className={`flex items-center gap-2 px-3 py-2 rounded-md transition-colors ${
+                  isActive('/') 
+                    ? 'bg-primary text-primary-foreground' 
+                    : 'hover:bg-muted text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <Upload className="h-4 w-4" />
+                <span className="hidden sm:inline">Upload</span>
+              </Link>
+              <Link 
+                to="/dashboard" 
+                className={`flex items-center gap-2 px-3 py-2 rounded-md transition-colors ${
+                  isActive('/dashboard') 
+                    ? 'bg-primary text-primary-foreground' 
+                    : 'hover:bg-muted text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <LayoutDashboard className="h-4 w-4" />
+                <span className="hidden sm:inline">Dashboard</span>
+              </Link>
+            </nav>
+
+            {/* Health Indicator */}
             <div className="flex items-center gap-2">
               <Activity className="h-4 w-4 text-muted-foreground" />
               <HealthIndicator />
@@ -58,14 +88,9 @@ const Layout = () => {
 
             {/* User Menu */}
             <div className="flex items-center gap-4">
-              <div className="text-right">
-                <p className="text-sm font-medium">
-                  {user.user_metadata?.full_name || user.email}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {user.email}
-                </p>
-              </div>
+              <Badge variant="outline" className="hidden md:flex">
+                {user.user_metadata?.full_name || user.email}
+              </Badge>
               <Avatar>
                 <AvatarFallback className="bg-primary text-primary-foreground">
                   {userInitials}
@@ -78,6 +103,7 @@ const Layout = () => {
                 className="text-muted-foreground hover:text-foreground"
               >
                 <LogOut className="h-4 w-4" />
+                <span className="hidden sm:inline ml-2">Sign Out</span>
               </Button>
             </div>
           </div>
