@@ -14,12 +14,16 @@ export const supabaseService = {
       throw new Error(`Upload failed: ${error.message}`);
     }
 
-    // Get the public URL - this creates a signed URL that works with the Med-AI API
-    const { data: { publicUrl } } = supabase.storage
+    // Create a signed URL that's valid for 1 hour - this will work with external APIs
+    const { data: signedUrlData, error: urlError } = await supabase.storage
       .from('medical-documents')
-      .getPublicUrl(fileName);
+      .createSignedUrl(fileName, 3600); // 1 hour expiry
 
-    return publicUrl;
+    if (urlError) {
+      throw new Error(`Failed to create signed URL: ${urlError.message}`);
+    }
+
+    return signedUrlData.signedUrl;
   },
 
   async saveProcessedDocument(
