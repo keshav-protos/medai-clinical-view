@@ -1,9 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Upload, FileText, BarChart3, Users } from 'lucide-react';
+import { FileText, BarChart3, Users, Activity } from 'lucide-react';
+import { FileUpload } from '@/components/FileUpload';
+import { ProcessedDocument } from '@/types/medical';
 
 const Index = () => {
+  const [processedDocuments, setProcessedDocuments] = useState<ProcessedDocument[]>([]);
+
+  const handleDocumentProcessed = (document: ProcessedDocument) => {
+    setProcessedDocuments(prev => [document, ...prev]);
+  };
+
   return (
     <div className="space-y-8">
       {/* Hero Section */}
@@ -24,29 +31,49 @@ const Index = () => {
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0</div>
+            <div className="text-2xl font-bold">{processedDocuments.length}</div>
           </CardContent>
         </Card>
-        {/* Add more stat cards here */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Clinical Codes Found</CardTitle>
+            <BarChart3 className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {processedDocuments.reduce((sum, doc) => sum + doc.clinical_codes.length, 0)}
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Suggested Tasks</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {processedDocuments.reduce((sum, doc) => sum + doc.suggested_tasks.length, 0)}
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Processing Time</CardTitle>
+            <Activity className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {processedDocuments.length > 0 
+                ? `${(processedDocuments.reduce((sum, doc) => sum + (doc.processing_time || 0), 0) / processedDocuments.length).toFixed(1)}s`
+                : '0s'
+              }
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Upload Section */}
-      <Card className="border-dashed border-2 border-primary/30">
-        <CardHeader className="text-center">
-          <CardTitle className="flex items-center justify-center gap-2">
-            <Upload className="h-5 w-5" />
-            Upload Medical Document
-          </CardTitle>
-          <CardDescription>
-            Drop your PDF here or click to browse (Max 50MB)
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="text-center">
-          <Button variant="upload" size="lg" className="w-full max-w-md">
-            Choose PDF File
-          </Button>
-        </CardContent>
-      </Card>
+      <FileUpload onDocumentProcessed={handleDocumentProcessed} />
     </div>
   );
 };

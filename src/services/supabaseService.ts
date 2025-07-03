@@ -14,6 +14,7 @@ export const supabaseService = {
       throw new Error(`Upload failed: ${error.message}`);
     }
 
+    // Get the public URL - this creates a signed URL that works with the Med-AI API
     const { data: { publicUrl } } = supabase.storage
       .from('medical-documents')
       .getPublicUrl(fileName);
